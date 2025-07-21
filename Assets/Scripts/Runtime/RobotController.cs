@@ -6,12 +6,11 @@ namespace Runtime
     public class RobotController : MonoBehaviour
     {
         public RobotInstructionSO[] instructionAssets;
-
-        private Renderer _renderer;
+        private new Renderer renderer;
 
         private void Start()
         {
-            _renderer = GetComponent<Renderer>();
+            renderer = GetComponent<Renderer>();
             StartCoroutine(ExecuteInstructions());
         }
 
@@ -23,7 +22,7 @@ namespace Runtime
 
                 foreach (var command in instruction.Commands)
                 {
-                    yield return StartCoroutine(command.Execute(transform, _renderer));
+                    yield return StartCoroutine(command.Execute(transform, renderer));
                 }
             }
         }

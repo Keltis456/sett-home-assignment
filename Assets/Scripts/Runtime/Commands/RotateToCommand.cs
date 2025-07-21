@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Runtime
+namespace Runtime.Commands
 {
     public class RotateToCommand : RobotCommand
     {
-        private Quaternion targetRotation;
+        private readonly Quaternion targetRotation;
 
         public RotateToCommand(Vector3 eulerAngles, float duration) : base(duration)
         {
@@ -14,8 +14,8 @@ namespace Runtime
 
         public override IEnumerator Execute(Transform robot, Renderer renderer)
         {
-            Quaternion start = robot.rotation;
-            float time = 0f;
+            var start = robot.rotation;
+            var time = 0f;
 
             while (time < Duration)
             {

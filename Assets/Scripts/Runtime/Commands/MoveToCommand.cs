@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Runtime
+namespace Runtime.Commands
 {
     public class MoveToCommand : RobotCommand
     {
-        private Vector3 targetPosition;
+        private readonly Vector3 targetPosition;
 
         public MoveToCommand(Vector3 targetPosition, float duration) : base(duration)
         {
@@ -14,8 +14,8 @@ namespace Runtime
 
         public override IEnumerator Execute(Transform robot, Renderer renderer)
         {
-            Vector3 start = robot.position;
-            float time = 0f;
+            var start = robot.position;
+            var time = 0f;
 
             while (time < Duration)
             {

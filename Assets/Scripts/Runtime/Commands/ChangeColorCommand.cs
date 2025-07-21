@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Runtime
+namespace Runtime.Commands
 {
     public class ChangeColorCommand : RobotCommand
     {
-        private Color targetColor;
+        private readonly Color targetColor;
 
         public ChangeColorCommand(Color color, float duration) : base(duration)
         {
@@ -14,8 +14,8 @@ namespace Runtime
 
         public override IEnumerator Execute(Transform robot, Renderer renderer)
         {
-            Color start = renderer.material.color;
-            float time = 0f;
+            var start = renderer.material.color;
+            var time = 0f;
 
             while (time < Duration)
             {
