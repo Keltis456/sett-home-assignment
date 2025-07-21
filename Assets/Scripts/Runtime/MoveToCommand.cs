@@ -1,28 +1,30 @@
-
 using System.Collections;
 using UnityEngine;
 
-public class MoveToCommand : RobotCommand
+namespace Runtime
 {
-    private Vector3 targetPosition;
-
-    public MoveToCommand(Vector3 targetPosition, float duration) : base(duration)
+    public class MoveToCommand : RobotCommand
     {
-        this.targetPosition = targetPosition;
-    }
+        private Vector3 targetPosition;
 
-    public override IEnumerator Execute(Transform robot, Renderer renderer)
-    {
-        Vector3 start = robot.position;
-        float time = 0f;
-
-        while (time < Duration)
+        public MoveToCommand(Vector3 targetPosition, float duration) : base(duration)
         {
-            robot.position = Vector3.Lerp(start, targetPosition, time / Duration);
-            time += Time.deltaTime;
-            yield return null;
+            this.targetPosition = targetPosition;
         }
 
-        robot.position = targetPosition;
+        public override IEnumerator Execute(Transform robot, Renderer renderer)
+        {
+            Vector3 start = robot.position;
+            float time = 0f;
+
+            while (time < Duration)
+            {
+                robot.position = Vector3.Lerp(start, targetPosition, time / Duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+
+            robot.position = targetPosition;
+        }
     }
 }

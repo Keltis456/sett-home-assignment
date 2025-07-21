@@ -1,28 +1,30 @@
-
 using System.Collections;
 using UnityEngine;
 
-public class ChangeColorCommand : RobotCommand
+namespace Runtime
 {
-    private Color targetColor;
-
-    public ChangeColorCommand(Color color, float duration) : base(duration)
+    public class ChangeColorCommand : RobotCommand
     {
-        targetColor = color;
-    }
+        private Color targetColor;
 
-    public override IEnumerator Execute(Transform robot, Renderer renderer)
-    {
-        Color start = renderer.material.color;
-        float time = 0f;
-
-        while (time < Duration)
+        public ChangeColorCommand(Color color, float duration) : base(duration)
         {
-            renderer.material.color = Color.Lerp(start, targetColor, time / Duration);
-            time += Time.deltaTime;
-            yield return null;
+            targetColor = color;
         }
 
-        renderer.material.color = targetColor;
+        public override IEnumerator Execute(Transform robot, Renderer renderer)
+        {
+            Color start = renderer.material.color;
+            float time = 0f;
+
+            while (time < Duration)
+            {
+                renderer.material.color = Color.Lerp(start, targetColor, time / Duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+
+            renderer.material.color = targetColor;
+        }
     }
 }

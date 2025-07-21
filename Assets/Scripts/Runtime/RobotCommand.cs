@@ -1,15 +1,17 @@
-
 using System.Collections;
 using UnityEngine;
 
-public abstract class RobotCommand
+namespace Runtime
 {
-    public float Duration;
-
-    protected RobotCommand(float duration)
+    public abstract class RobotCommand
     {
-        Duration = duration;
-    }
+        protected readonly float Duration = 1f;
 
-    public abstract IEnumerator Execute(Transform robot, Renderer renderer);
+        protected RobotCommand(float duration)
+        {
+            Duration = duration;
+        }
+
+        public abstract IEnumerator Execute(Transform robot, Renderer renderer);
+    }
 }

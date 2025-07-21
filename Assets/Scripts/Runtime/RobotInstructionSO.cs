@@ -1,36 +1,38 @@
-
-using UnityEngine;
 using System;
+using UnityEngine;
 
-[Serializable]
-public class RobotCommandData
+namespace Runtime
 {
-    public CommandType type;
-    public float duration = 1f;
-    public Vector3 targetPosition; // For MoveTo
-    public Vector3 targetRotationEuler; // For RotateTo
-    public Color targetColor = Color.white; // For ChangeColor
-}
-
-public enum CommandType
-{
-    MoveTo,
-    RotateTo,
-    ChangeColor
-}
-
-[CreateAssetMenu(menuName = "Robot/Instruction")]
-public class RobotInstructionSO : ScriptableObject
-{
-    public RobotCommandData[] commands;
-
-    public RobotInstruction ToRuntimeInstruction()
+    [Serializable]
+    public class RobotCommandData
     {
-        var runtime = new RobotInstruction();
-        foreach (var cmdData in commands)
+        public CommandType type;
+        public float duration = 1f;
+        public Vector3 targetPosition; // For MoveTo
+        public Vector3 targetRotationEuler; // For RotateTo
+        public Color targetColor = Color.white; // For ChangeColor
+    }
+
+    public enum CommandType
+    {
+        MoveTo,
+        RotateTo,
+        ChangeColor
+    }
+
+    [CreateAssetMenu(menuName = "Robot/Instruction")]
+    public class RobotInstructionSO : ScriptableObject
+    {
+        public RobotCommandData[] commands;
+
+        public RobotInstruction ToRuntimeInstruction()
         {
-            runtime.AddCommand(RobotCommandFactory.Create(cmdData));
+            var runtime = new RobotInstruction();
+            foreach (var cmdData in commands)
+            {
+                runtime.AddCommand(RobotCommandFactory.Create(cmdData));
+            }
+            return runtime;
         }
-        return runtime;
     }
 }

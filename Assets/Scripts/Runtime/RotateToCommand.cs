@@ -1,28 +1,30 @@
-
 using System.Collections;
 using UnityEngine;
 
-public class RotateToCommand : RobotCommand
+namespace Runtime
 {
-    private Quaternion targetRotation;
-
-    public RotateToCommand(Vector3 eulerAngles, float duration) : base(duration)
+    public class RotateToCommand : RobotCommand
     {
-        targetRotation = Quaternion.Euler(eulerAngles);
-    }
+        private Quaternion targetRotation;
 
-    public override IEnumerator Execute(Transform robot, Renderer renderer)
-    {
-        Quaternion start = robot.rotation;
-        float time = 0f;
-
-        while (time < Duration)
+        public RotateToCommand(Vector3 eulerAngles, float duration) : base(duration)
         {
-            robot.rotation = Quaternion.Slerp(start, targetRotation, time / Duration);
-            time += Time.deltaTime;
-            yield return null;
+            targetRotation = Quaternion.Euler(eulerAngles);
         }
 
-        robot.rotation = targetRotation;
+        public override IEnumerator Execute(Transform robot, Renderer renderer)
+        {
+            Quaternion start = robot.rotation;
+            float time = 0f;
+
+            while (time < Duration)
+            {
+                robot.rotation = Quaternion.Slerp(start, targetRotation, time / Duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+
+            robot.rotation = targetRotation;
+        }
     }
 }

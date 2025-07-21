@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
 using System.Collections.Generic;
+using Runtime;
 
 [CustomEditor(typeof(RobotController))]
 public class RobotControllerEditor : Editor
@@ -39,6 +40,20 @@ public class RobotControllerEditor : Editor
 
             instructionProp.objectReferenceValue = EditorGUILayout.ObjectField(
                 $"Instruction {i + 1}", instructionSO, typeof(RobotInstructionSO), false);
+
+            // Move Up button
+            GUI.enabled = i > 0;
+            if (GUILayout.Button("↑", GUILayout.Width(20)))
+            {
+                instructionsProp.MoveArrayElement(i, i - 1);
+            }
+            // Move Down button
+            GUI.enabled = i < instructionsProp.arraySize - 1;
+            if (GUILayout.Button("↓", GUILayout.Width(20)))
+            {
+                instructionsProp.MoveArrayElement(i, i + 1);
+            }
+            GUI.enabled = true;
 
             if (GUILayout.Button("X", GUILayout.Width(20)))
             {
@@ -103,6 +118,20 @@ public class RobotControllerEditor : Editor
             EditorGUILayout.BeginVertical("box");
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"  └ Command {j + 1}", EditorStyles.boldLabel);
+            
+            // Move Up button
+            GUI.enabled = j > 0;
+            if (GUILayout.Button("↑", GUILayout.Width(20)))
+            {
+                commandsProp.MoveArrayElement(j, j - 1);
+            }
+            GUI.enabled = j < commandsProp.arraySize - 1;
+            if (GUILayout.Button("↓", GUILayout.Width(20)))
+            {
+                commandsProp.MoveArrayElement(j, j + 1);
+            }
+            GUI.enabled = true;
+
             if (GUILayout.Button("–", GUILayout.Width(20)))
             {
                 commandsProp.DeleteArrayElementAtIndex(j);

@@ -1,31 +1,33 @@
-
 using System.Collections.Generic;
 
-public class RobotInstruction
+namespace Runtime
 {
-    public List<RobotCommand> Commands = new();
-
-    public RobotInstruction AddCommand(RobotCommand command)
+    public class RobotInstruction
     {
-        Commands.Add(command);
-        return this;
-    }
-}
+        public readonly List<RobotCommand> Commands = new();
 
-public static class RobotCommandFactory
-{
-    public static RobotCommand Create(RobotCommandData data)
-    {
-        switch (data.type)
+        public RobotInstruction AddCommand(RobotCommand command)
         {
-            case CommandType.MoveTo:
-                return new MoveToCommand(data.targetPosition, data.duration);
-            case CommandType.RotateTo:
-                return new RotateToCommand(data.targetRotationEuler, data.duration);
-            case CommandType.ChangeColor:
-                return new ChangeColorCommand(data.targetColor, data.duration);
-            default:
-                throw new System.ArgumentException($"Unknown command type: {data.type}");
+            Commands.Add(command);
+            return this;
+        }
+    }
+
+    public static class RobotCommandFactory
+    {
+        public static RobotCommand Create(RobotCommandData data)
+        {
+            switch (data.type)
+            {
+                case CommandType.MoveTo:
+                    return new MoveToCommand(data.targetPosition, data.duration);
+                case CommandType.RotateTo:
+                    return new RotateToCommand(data.targetRotationEuler, data.duration);
+                case CommandType.ChangeColor:
+                    return new ChangeColorCommand(data.targetColor, data.duration);
+                default:
+                    throw new System.ArgumentException($"Unknown command type: {data.type}");
+            }
         }
     }
 }

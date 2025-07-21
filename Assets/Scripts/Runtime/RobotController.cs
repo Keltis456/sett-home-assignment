@@ -1,28 +1,30 @@
-
 using System.Collections;
 using UnityEngine;
 
-public class RobotController : MonoBehaviour
+namespace Runtime
 {
-    public RobotInstructionSO[] instructionAssets;
-
-    private Renderer _renderer;
-
-    private void Start()
+    public class RobotController : MonoBehaviour
     {
-        _renderer = GetComponent<Renderer>();
-        StartCoroutine(ExecuteInstructions());
-    }
+        public RobotInstructionSO[] instructionAssets;
 
-    private IEnumerator ExecuteInstructions()
-    {
-        foreach (var instructionSO in instructionAssets)
+        private Renderer _renderer;
+
+        private void Start()
         {
-            var instruction = instructionSO.ToRuntimeInstruction();
+            _renderer = GetComponent<Renderer>();
+            StartCoroutine(ExecuteInstructions());
+        }
 
-            foreach (var command in instruction.Commands)
+        private IEnumerator ExecuteInstructions()
+        {
+            foreach (var instructionSO in instructionAssets)
             {
-                yield return StartCoroutine(command.Execute(transform, _renderer));
+                var instruction = instructionSO.ToRuntimeInstruction();
+
+                foreach (var command in instruction.Commands)
+                {
+                    yield return StartCoroutine(command.Execute(transform, _renderer));
+                }
             }
         }
     }
