@@ -5,7 +5,7 @@ namespace Runtime
 {
     public abstract class RobotCommand
     {
-        protected readonly float Duration = 1f;
+        protected readonly float Duration;
 
         protected RobotCommand(float duration)
         {
