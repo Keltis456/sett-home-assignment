@@ -8,7 +8,6 @@ using System.Collections.Generic;
 public class RobotControllerEditor : Editor
 {
     private SerializedProperty instructionsProp;
-    private List<ReorderableList> commandLists = new();
 
     private void OnEnable()
     {
@@ -19,6 +18,7 @@ public class RobotControllerEditor : Editor
     {
         serializedObject.Update();
 
+        EditorGUILayout.HelpBox("⚠️ Changes to any instruction will affect ALL robots that use it!", MessageType.Warning);
         EditorGUILayout.LabelField("🤖 Robot Instruction Editor", EditorStyles.boldLabel);
         EditorGUILayout.Space(5);
 
@@ -48,60 +48,111 @@ public class RobotControllerEditor : Editor
 
             EditorGUILayout.EndHorizontal();
 
-            // Nested Command Editor
-            SerializedObject instructionSerialized = new SerializedObject(instructionSO);
-            SerializedProperty commandsProp = instructionSerialized.FindProperty("commands");
+            DrawCommandListEditor(new SerializedObject(instructionSO));
 
-            EditorGUI.indentLevel++;
-            for (int j = 0; j < commandsProp.arraySize; j++)
-            {
-                SerializedProperty cmdProp = commandsProp.GetArrayElementAtIndex(j);
-                EditorGUILayout.BeginHorizontal();
-
-                cmdProp.objectReferenceValue = EditorGUILayout.ObjectField(
-                    $"  └ Command {j + 1}", cmdProp.objectReferenceValue, typeof(RobotCommandSO), false);
-
-                if (GUILayout.Button("✎", GUILayout.Width(25)))
-                {
-                    Selection.activeObject = cmdProp.objectReferenceValue;
-                }
-
-                if (GUILayout.Button("–", GUILayout.Width(20)))
-                {
-                    commandsProp.DeleteArrayElementAtIndex(j);
-                    break;
-                }
-
-                EditorGUILayout.EndHorizontal();
-            }
-
-            EditorGUILayout.Space(2);
-            if (GUILayout.Button("+ Add Command", GUILayout.Width(150)))
-            {
-                commandsProp.InsertArrayElementAtIndex(commandsProp.arraySize);
-            }
-
-            EditorGUI.indentLevel--;
-
-            instructionSerialized.ApplyModifiedProperties();
             EditorGUILayout.EndVertical();
             EditorGUILayout.Space();
         }
 
-        if (GUILayout.Button("+ Add Instruction", GUILayout.Height(30)))
+        // Add Instruction: choose existing or create new
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("Add Instruction", EditorStyles.boldLabel);
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("+ Create New Instruction", GUILayout.Height(30)))
         {
-            instructionsProp.InsertArrayElementAtIndex(instructionsProp.arraySize);
+            string path = EditorUtility.SaveFilePanelInProject("Create New Instruction", "New Robot Instruction", "asset", "Choose location for new instruction asset");
+            if (!string.IsNullOrEmpty(path))
+            {
+                var newInstruction = ScriptableObject.CreateInstance<RobotInstructionSO>();
+                AssetDatabase.CreateAsset(newInstruction, path);
+                AssetDatabase.SaveAssets();
+                instructionsProp.InsertArrayElementAtIndex(instructionsProp.arraySize);
+                instructionsProp.GetArrayElementAtIndex(instructionsProp.arraySize - 1).objectReferenceValue = newInstruction;
+            }
+        }
+        if (GUILayout.Button("+ Reuse Existing Instruction", GUILayout.Height(30)))
+        {
+            EditorGUIUtility.ShowObjectPicker<RobotInstructionSO>(null, false, "", 12345);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        // Handle object picker for reusing existing instruction
+        if (Event.current.type == EventType.ExecuteCommand && Event.current.commandName == "ObjectSelectorClosed")
+        {
+            Object picked = EditorGUIUtility.GetObjectPickerObject();
+            if (picked is RobotInstructionSO pickedInstruction)
+            {
+                instructionsProp.InsertArrayElementAtIndex(instructionsProp.arraySize);
+                instructionsProp.GetArrayElementAtIndex(instructionsProp.arraySize - 1).objectReferenceValue = pickedInstruction;
+                serializedObject.ApplyModifiedProperties();
+                GUI.FocusControl(null); // Remove focus to avoid repeated assignment
+                Event.current.Use(); // Prevent further processing
+            }
         }
 
         serializedObject.ApplyModifiedProperties();
+    }
 
-        EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("Tools", EditorStyles.boldLabel);
-
-        if (GUILayout.Button("🪄 Open Command Creation Wizard", GUILayout.Height(25)))
+    public static void DrawCommandListEditor(SerializedObject instructionSerialized)
+    {
+        SerializedProperty commandsProp = instructionSerialized.FindProperty("commands");
+        EditorGUI.indentLevel++;
+        for (int j = 0; j < commandsProp.arraySize; j++)
         {
-            RobotCommandWizard.ShowWindow();
+            SerializedProperty cmdProp = commandsProp.GetArrayElementAtIndex(j);
+            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"  └ Command {j + 1}", EditorStyles.boldLabel);
+            if (GUILayout.Button("–", GUILayout.Width(20)))
+            {
+                commandsProp.DeleteArrayElementAtIndex(j);
+                break;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            SerializedProperty typeProp = cmdProp.FindPropertyRelative("type");
+            SerializedProperty durationProp = cmdProp.FindPropertyRelative("duration");
+            SerializedProperty posProp = cmdProp.FindPropertyRelative("targetPosition");
+            SerializedProperty rotProp = cmdProp.FindPropertyRelative("targetRotationEuler");
+            SerializedProperty colorProp = cmdProp.FindPropertyRelative("targetColor");
+
+            EditorGUILayout.PropertyField(typeProp);
+            EditorGUILayout.PropertyField(durationProp);
+
+            CommandType type = (CommandType)typeProp.enumValueIndex;
+            switch (type)
+            {
+                case CommandType.MoveTo:
+                    EditorGUILayout.PropertyField(posProp, new GUIContent("Target Position"));
+                    break;
+                case CommandType.RotateTo:
+                    EditorGUILayout.PropertyField(rotProp, new GUIContent("Target Rotation"));
+                    break;
+                case CommandType.ChangeColor:
+                    EditorGUILayout.PropertyField(colorProp, new GUIContent("Target Color"));
+                    break;
+            }
+            EditorGUILayout.EndVertical();
         }
+        EditorGUILayout.Space(2);
+        if (GUILayout.Button("+ Add Command", GUILayout.Width(150)))
+        {
+            commandsProp.InsertArrayElementAtIndex(commandsProp.arraySize);
+        }
+        EditorGUI.indentLevel--;
+        instructionSerialized.ApplyModifiedProperties();
+    }
+}
+
+[CustomEditor(typeof(RobotInstructionSO))]
+public class RobotInstructionSOEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        EditorGUILayout.HelpBox("⚠️ Changes to this instruction will affect ALL robots that use it!", MessageType.Warning);
+        serializedObject.Update();
+        RobotControllerEditor.DrawCommandListEditor(serializedObject);
+        serializedObject.ApplyModifiedProperties();
     }
 }
 #endif
